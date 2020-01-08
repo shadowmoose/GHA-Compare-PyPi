@@ -16,9 +16,15 @@ jobs:
           asset: test.png
           files: ./test/requirements.txt
 
+      - name: Print the output
+        run: |
+          echo "Latest tag: ${{ steps.test.outputs.release_tag }}";
+          echo "Update Available: ${{ steps.test.outputs.updated_packages }}";
+          echo "Updated packages: ${{ steps.test.outputs.updated_packages }}";
+
       - name: Launch the local action - string
         uses: ./ # Uses an action in the root directory
-        id: test
+        id: test2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           asset: test.png
@@ -26,6 +32,6 @@ jobs:
 
       - name: Print the output
         run: |
-          echo "Latest tag: ${{ steps.test.outputs.release_tag }}";
-          echo "Update Available: ${{ steps.test.outputs.updated_packages }}";
-          echo "Updated packages: ${{ steps.test.outputs.updated_packages }}";
+          echo "Latest tag: ${{ steps.test2.outputs.release_tag }}";
+          echo "Update Available: ${{ steps.test2.outputs.updated_packages }}";
+          echo "Updated packages: ${{ steps.test2.outputs.updated_packages }}";
