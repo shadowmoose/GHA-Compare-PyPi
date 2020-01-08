@@ -79,7 +79,7 @@ const readReqs = files => {
 		});
 	}
 
-	return ret;
+	return [...ret];
 };
 
 run().catch(err => {
