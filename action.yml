@@ -1,0 +1,37 @@
+name: 'Compare Binary against PyPi'
+description: 'Check binary release dates against PyPi package release dates.'
+inputs:
+  token:
+    description: 'An authorized GitHub token.'
+    required: true
+  asset:
+    description: 'The name of the asset to check against.'
+    required: true
+  owner:
+    description: 'The owner of the target project.'
+    required: false
+    default: ""
+  repo:
+    description: 'The target project.'
+    required: false
+    default: ""
+  packages:
+    description: 'A comma-separated string of PyPi packages. Either use this, or "files".'
+    required: false
+    default: ""
+  files:
+    description: 'A comma-separated string of requirements.txt files. Either use this, or "packages".'
+    required: false
+    default: ""
+
+outputs:
+  release_tag:
+    description: 'The latest release tag.'
+  updated_packages:
+    description: 'A comma-separated list of any packages that have been updated.'
+  update_available:
+    description: 'Returns "true" if the latest release binary predates a package update.'
+
+runs:
+  using: 'node12'
+  main: 'index.js'
