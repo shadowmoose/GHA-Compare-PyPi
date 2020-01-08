@@ -64,13 +64,13 @@ const read = (url) => {
 };
 
 
-const readReqs = async files => {
+const readReqs = files => {
 	const ret = new Set();
 
 	if (files) {
 		files.split(',').filter(f => f.trim().length).map(f => {
 			const content = fs.readFileSync(f.trim());
-			core.info(content);
+			core.info(`File: ${f}; Content: ${content}`);
 			const lns = content.split('\n');
 			for (const l of lns) {
 				if (['<', '=='].all(ig => !l.includes(ig))) {
