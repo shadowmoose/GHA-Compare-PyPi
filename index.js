@@ -36,12 +36,13 @@ async function run() {
 
 	const updates = new Set();
 	await Promise.all(
-		lines.map(async package => {
-			core.info(`Checking package: ${package}`);
-			const data = JSON.parse(await read(`https://pypi.org/pypi/${package.trim()}/json`));
+		lines.map(async pkg => {
+			pkg = pkg.trim();
+			core.info(`Checking package: ${pkg}`);
+			const data = JSON.parse(await read(`https://pypi.org/pypi/${pkg}/json`));
 			const d = new Date(data.releases[data.info.version][0].upload_time_iso_8601);
 			if (d > latestBuildDate) {
-				updates.add(package);
+				updates.add(pkg);
 			}
 		})
 	);

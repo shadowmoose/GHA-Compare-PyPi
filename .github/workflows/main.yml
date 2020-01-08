@@ -21,7 +21,7 @@ jobs:
       - name: Print the output
         run: |
           echo "Latest tag: ${{ steps.test.outputs.release_tag }}";
-          echo "Update Available: ${{ steps.test.outputs.updated_packages }}";
+          echo "Update Available: ${{ steps.test.outputs.update_available }}";
           echo "Updated packages: ${{ steps.test.outputs.updated_packages }}";
 
       - name: Launch the local action - string
@@ -37,5 +37,5 @@ jobs:
       - name: Print the output
         run: |
           echo "Latest tag: ${{ steps.test2.outputs.release_tag }}";
-          echo "Update Available: ${{ steps.test2.outputs.updated_packages }}";
+          echo "Update Available: ${{ steps.test2.outputs.update_available }}";
           echo "Updated packages: ${{ steps.test2.outputs.updated_packages }}";
