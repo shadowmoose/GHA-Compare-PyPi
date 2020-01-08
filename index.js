@@ -72,7 +72,7 @@ const readReqs = files => {
 			core.info(`Reading: ${f}`);
 			const lns = fs.readFileSync(f, 'utf-8').split('\n').filter(Boolean);
 			for (const l of lns) {
-				if (['<', '=='].all(ig => !l.includes(ig))) {
+				if (['<', '=='].every(ig => !l.includes(ig))) {
 					ret.add(l.trim());
 				}
 			}
