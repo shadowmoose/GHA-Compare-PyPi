@@ -13,6 +13,7 @@ jobs:
         id: test
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          repo: RedditDownloader
           asset: test.png
           files: ./test/requirements.txt
 
@@ -27,6 +28,7 @@ jobs:
         id: test2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          repo: RedditDownloader
           asset: test.png
           files: pyderman, requests, praw
 
