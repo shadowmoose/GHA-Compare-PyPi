@@ -14,6 +14,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repo: RedditDownloader
+          owner: ShadowMoose
           asset: test.png
           files: ./test/requirements.txt
 
@@ -29,8 +30,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repo: RedditDownloader
+          owner: ShadowMoose
           asset: test.png
-          files: pyderman, requests, praw
+          packages: pyderman, requests, praw
 
       - name: Print the output
         run: |
