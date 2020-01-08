@@ -69,7 +69,9 @@ const readReqs = async files => {
 
 	if (files) {
 		files.split(',').filter(f => f.trim().length).map(f => {
-			const lns = fs.readFileSync(f).split('\n');
+			const content = fs.readFileSync(f.trim());
+			core.info(content);
+			const lns = content.split('\n');
 			for (const l of lns) {
 				if (['<', '=='].all(ig => !l.includes(ig))) {
 					ret.add(l.trim());
