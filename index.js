@@ -34,9 +34,7 @@ async function run() {
 	if (reqFiles) {
 		core.info(`Downloading latest release tag's zip...`);
 		baseDir = await downloadRepo(octokit, owner, repo, releaseTag);
-		fs.readdirSync(baseDir).forEach(file => {
-			core.info(file);
-		});
+		baseDir = path.join(baseDir, fs.readdirSync(baseDir)[0]); // Append the auto-generated base github dir.
 	}
 
 	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, baseDir)).filter(l => l.trim().length);
