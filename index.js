@@ -4,6 +4,7 @@ const https = require('https');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const path = require('path');
+const rp = require('request-promise');
 
 
 async function run() {
@@ -47,9 +48,11 @@ async function run() {
 		lines.map(async pkg => {
 			pkg = pkg.trim();
 			core.info(`Checking package: ${pkg}`);
-			const json = await read(`https://pypi.org/pypi/${pkg}/json`);
-			core.info(json);
-			const data = JSON.parse(json);
+			const data = await rp({
+				uri: `https://pypi.org/pypi/${pkg}/json`,
+				json: true
+			});
+			core.info(data);
 			const d = new Date(data.releases[data.info.version][0].upload_time_iso_8601);
 			if (d > latestBuildDate) {
 				updates.add(pkg);
@@ -60,19 +63,6 @@ async function run() {
 	core.setOutput("updated_packages", `${[...updates].join(',')}`);
 	core.setOutput('update_available', updates.size > 0)
 }
-
-
-const read = (url) => {
-	return new Promise((resolve, reject) => {
-		https.get(url, (resp) => {
-			let data = '';
-			resp.on('data', (chunk) => {data += chunk;});
-			resp.on('end', () => {resolve(data);});
-		}).on("error", (err) => {
-			reject(err);
-		});
-	});
-};
 
 
 const readReqs = async (files, baseDir) => {
