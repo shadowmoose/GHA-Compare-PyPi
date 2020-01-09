@@ -34,7 +34,7 @@ async function run() {
 	if (reqFiles) {
 		core.info('Downloading latest release tag...');
 		baseDir = await downloadRepo(octokit, owner, repo, releaseTag);
-		core.info(baseDir)
+		core.info(JSON.stringify(baseDir))
 	}
 
 	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, baseDir)).filter(l => l.trim().length);
