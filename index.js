@@ -73,8 +73,11 @@ const readReqs = async (files, baseDir) => {
 			f = path.join(baseDir, f.trim());
 			core.info(`Reading: ${f}`);
 			const lns = fs.readFileSync(f, 'utf-8').split('\n').filter(Boolean);
-			for (const l of lns) {
+			for (let l of lns) {
 				if (['<', '=='].every(ig => !l.includes(ig))) {
+					if (l.includes('>')) {
+						l = l.split('>')[0];
+					}
 					ret.add(l.trim());
 				}
 			}
