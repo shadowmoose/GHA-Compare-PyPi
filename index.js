@@ -1,9 +1,9 @@
 const github = require('@actions/github');
 const core = require('@actions/core');
 const fs = require('fs');
-const { spawn } = require('child_process');
 const path = require('path');
 const rp = require('request-promise-native');
+const AdmZip = require('adm-zip');
 
 
 async function run() {
@@ -30,14 +30,15 @@ async function run() {
 	}
 	const latestBuildDate = new Date(latestBuild);
 
-	let baseDir = '';
+	let zipURL = '';
 	if (reqFiles) {
-		core.info('Downloading latest release tag...');
-		baseDir = await downloadRepo(octokit, owner, repo, releaseTag);
-		core.info(JSON.stringify(baseDir))
+		core.info(`Downloading latest release tag's zip...`);
+		zipURL = await downloadRepo(octokit, owner, repo, releaseTag);
+
+		core.info(zipURL)
 	}
 
-	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, baseDir)).filter(l => l.trim().length);
+	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, zipURL)).filter(l => l.trim().length);
 
 	if (!lines || !lines.length) {
 		return core.setFailed(`You must either specify a list of packages, or a list of valid requirements files!`);
@@ -88,12 +89,25 @@ const readReqs = async (files, baseDir) => {
 
 
 const downloadRepo = async(octokit, owner, repo, tag) => {
-	return await octokit.repos.getArchiveLink({
+	const url = await octokit.repos.getArchiveLink({
 		owner,
 		repo,
 		archive_format: 'zipball',
 		ref: tag
 	});
+
+	const buff = await rp({
+		uri: url,
+		method: "GET",
+		encoding: null,
+		headers: {
+			"Content-type": "application/zip"
+		}
+	});
+
+	const zip = new AdmZip(buff);
+
+	return zip.getEntries();
 };
 
 
