@@ -72,7 +72,6 @@ const readReqs = async (files, baseDir) => {
 	if (files) {
 		files.split(',').filter(f => f.trim().length).map(f => {
 			f = path.join(baseDir, f.trim());
-			core.info(`Reading: ${f}`);
 			const lns = fs.readFileSync(f, 'utf-8').split('\n').filter(Boolean);
 			for (let l of lns) {
 				if (['<', '=='].every(ig => !l.includes(ig))) {
@@ -111,7 +110,7 @@ const downloadRepo = async(octokit, owner, repo, tag) => {
 
 	await zip.extractAllTo(target,true);
 
-	return target;
+	return path.resolve(target);
 };
 
 
