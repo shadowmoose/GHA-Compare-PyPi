@@ -4,7 +4,7 @@ const https = require('https');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const path = require('path');
-const rp = require('request-promise');
+const rp = require('request-promise-native');
 
 
 async function run() {
