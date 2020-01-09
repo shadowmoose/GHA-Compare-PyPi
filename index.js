@@ -34,6 +34,9 @@ async function run() {
 	if (reqFiles) {
 		core.info(`Downloading latest release tag's zip...`);
 		baseDir = await downloadRepo(octokit, owner, repo, releaseTag);
+		fs.readdirSync(baseDir).forEach(file => {
+			core.info(file);
+		});
 	}
 
 	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, baseDir)).filter(l => l.trim().length);
