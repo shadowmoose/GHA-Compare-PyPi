@@ -47,7 +47,9 @@ async function run() {
 		lines.map(async pkg => {
 			pkg = pkg.trim();
 			core.info(`Checking package: ${pkg}`);
-			const data = JSON.parse(await read(`https://pypi.org/pypi/${pkg}/json`));
+			const json = await read(`https://pypi.org/pypi/${pkg}/json`);
+			core.info(json);
+			const data = JSON.parse(json);
 			const d = new Date(data.releases[data.info.version][0].upload_time_iso_8601);
 			if (d > latestBuildDate) {
 				updates.add(pkg);
@@ -99,16 +101,15 @@ const downloadRepo = async(token, owner, repo, tag) => {
 		`https://${token}@github.com/${owner}/${repo}.git`,
 		out
 	];
-	const prom = new Promise( (res, rej) => {
+	await new Promise( (res, rej) => {
 		const child = spawn('git', cmd);
 		child.on('exit', code => {
 			if (code) {
-				rej(`Failed with code: ${code}`)
+				rej(`Failed tag download with code: ${code}`)
 			}
 			res()
 		});
 	});
-	await prom;
 
 	return path.resolve(out);
 };
