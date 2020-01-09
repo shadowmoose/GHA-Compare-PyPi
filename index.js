@@ -97,7 +97,7 @@ const downloadRepo = async(octokit, owner, repo, tag) => {
 	});
 
 	const buff = await rp({
-		uri: url,
+		uri: url.url,
 		method: "GET",
 		encoding: null,
 		headers: {
