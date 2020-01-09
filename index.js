@@ -1,6 +1,5 @@
 const github = require('@actions/github');
 const core = require('@actions/core');
-const https = require('https');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const path = require('path');
@@ -52,7 +51,6 @@ async function run() {
 				uri: `https://pypi.org/pypi/${pkg}/json`,
 				json: true
 			});
-			core.info(data);
 			const d = new Date(data.releases[data.info.version][0].upload_time_iso_8601);
 			if (d > latestBuildDate) {
 				updates.add(pkg);
