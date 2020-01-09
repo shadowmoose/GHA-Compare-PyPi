@@ -2,6 +2,8 @@ const github = require('@actions/github');
 const core = require('@actions/core');
 const https = require('https');
 const fs = require('fs');
+const { spawn } = require('child_process');
+const path = require('path');
 
 
 async function run() {
@@ -28,7 +30,13 @@ async function run() {
 	}
 	const latestBuildDate = new Date(latestBuild);
 
-	const lines = (packages ? packages.split(',') : readReqs(reqFiles)).filter(l => l.trim().length);
+	let baseDir = '';
+	if (reqFiles) {
+		core.info('Downloading latest release tag...');
+		baseDir = await downloadRepo(token, owner, repo, releaseTag);
+	}
+
+	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, baseDir)).filter(l => l.trim().length);
 
 	if (!lines || !lines.length) {
 		return core.setFailed(`You must either specify a list of packages, or a list of valid requirements files!`);
@@ -65,11 +73,12 @@ const read = (url) => {
 };
 
 
-const readReqs = files => {
+const readReqs = async (files, baseDir) => {
 	const ret = new Set();
 
 	if (files) {
 		files.split(',').filter(f => f.trim().length).map(f => {
+			f = path.join(baseDir, f.trim());
 			core.info(`Reading: ${f}`);
 			const lns = fs.readFileSync(f, 'utf-8').split('\n').filter(Boolean);
 			for (const l of lns) {
@@ -82,6 +91,28 @@ const readReqs = files => {
 
 	return [...ret];
 };
+
+
+const downloadRepo = async(token, owner, repo, tag) => {
+	const out = '___tmp_dl';
+	const cmd = [`clone`, `-b`, tag, `--single-branch`, `--depth`, `1`,
+		`https://${token}@github.com/${owner}/${repo}.git`,
+		out
+	];
+	const prom = new Promise( (res, rej) => {
+		const child = spawn('git', cmd);
+		child.on('exit', code => {
+			if (code) {
+				rej(`Failed with code: ${code}`)
+			}
+			res()
+		});
+	});
+	await prom;
+
+	return path.resolve(out);
+};
+
 
 run().catch(err => {
 	core.setFailed(`${err}`);
