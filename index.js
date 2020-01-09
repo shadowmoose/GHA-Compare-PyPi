@@ -33,7 +33,8 @@ async function run() {
 	let baseDir = '';
 	if (reqFiles) {
 		core.info('Downloading latest release tag...');
-		baseDir = await downloadRepo(token, owner, repo, releaseTag);
+		baseDir = await downloadRepo(octokit, owner, repo, releaseTag);
+		core.info(baseDir)
 	}
 
 	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, baseDir)).filter(l => l.trim().length);
@@ -86,23 +87,13 @@ const readReqs = async (files, baseDir) => {
 };
 
 
-const downloadRepo = async(token, owner, repo, tag) => {
-	const out = '___tmp_dl';
-	const cmd = [`clone`, `-b`, tag, `--single-branch`, `--depth`, `1`,
-		`https://${token}@github.com/${owner}/${repo}.git`,
-		out
-	];
-	await new Promise( (res, rej) => {
-		const child = spawn('git', cmd);
-		child.on('exit', code => {
-			if (code) {
-				rej(`Failed tag download with code: ${code}`)
-			}
-			res()
-		});
+const downloadRepo = async(octokit, owner, repo, tag) => {
+	return await octokit.repos.getArchiveLink({
+		owner,
+		repo,
+		archive_format: 'zipball',
+		ref: tag
 	});
-
-	return path.resolve(out);
 };
 
 
