@@ -1,6 +1,6 @@
 {
   "name": "gh-action-compare-pypi",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,8 @@
   "homepage": "https://github.com/shadowmoose/GHA-Compare-PyPi",
   "dependencies": {
     "@actions/core": "^1.2.0",
-    "@actions/github": "^2.0.0"
+    "@actions/github": "^2.0.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.8"
   }
 }

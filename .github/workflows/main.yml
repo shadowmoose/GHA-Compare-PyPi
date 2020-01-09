@@ -17,7 +17,7 @@ jobs:
           repo: RedditDownloader
           owner: ShadowMoose
           asset: test.png
-          files: ./test/requirements.txt
+          files: ./requirements.txt
 
       - name: Print the output
         run: |
