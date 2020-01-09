@@ -30,15 +30,13 @@ async function run() {
 	}
 	const latestBuildDate = new Date(latestBuild);
 
-	let zipURL = '';
+	let baseDir = null;
 	if (reqFiles) {
 		core.info(`Downloading latest release tag's zip...`);
-		zipURL = await downloadRepo(octokit, owner, repo, releaseTag);
-
-		core.info(zipURL)
+		baseDir = await downloadRepo(octokit, owner, repo, releaseTag);
 	}
 
-	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, zipURL)).filter(l => l.trim().length);
+	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, baseDir)).filter(l => l.trim().length);
 
 	if (!lines || !lines.length) {
 		return core.setFailed(`You must either specify a list of packages, or a list of valid requirements files!`);
@@ -67,7 +65,9 @@ async function run() {
 
 const readReqs = async (files, baseDir) => {
 	const ret = new Set();
-
+	if (!files || !baseDir) {
+		return [];
+	}
 	if (files) {
 		files.split(',').filter(f => f.trim().length).map(f => {
 			f = path.join(baseDir, f.trim());
@@ -89,7 +89,7 @@ const readReqs = async (files, baseDir) => {
 
 
 const downloadRepo = async(octokit, owner, repo, tag) => {
-	const url = await octokit.repos.getArchiveLink({
+	const arch = await octokit.repos.getArchiveLink({
 		owner,
 		repo,
 		archive_format: 'zipball',
@@ -97,7 +97,7 @@ const downloadRepo = async(octokit, owner, repo, tag) => {
 	});
 
 	const buff = await rp({
-		uri: url.url,
+		uri: arch.url,
 		method: "GET",
 		encoding: null,
 		headers: {
@@ -106,8 +106,11 @@ const downloadRepo = async(octokit, owner, repo, tag) => {
 	});
 
 	const zip = new AdmZip(buff);
+	const target = './___tmp_extract';
 
-	return zip.getEntries();
+	await zip.extractAllTo(target,true);
+
+	return target;
 };
 
 
