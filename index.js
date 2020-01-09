@@ -1,9 +1,9 @@
 const github = require('@actions/github');
 const core = require('@actions/core');
 const fs = require('fs');
-const { spawn } = require('child_process');
 const path = require('path');
 const rp = require('request-promise-native');
+const AdmZip = require('adm-zip');
 
 
 async function run() {
@@ -30,10 +30,11 @@ async function run() {
 	}
 	const latestBuildDate = new Date(latestBuild);
 
-	let baseDir = '';
+	let baseDir = null;
 	if (reqFiles) {
-		core.info('Downloading latest release tag...');
-		baseDir = await downloadRepo(token, owner, repo, releaseTag);
+		core.info(`Downloading latest release tag's zip...`);
+		baseDir = await downloadRepo(octokit, owner, repo, releaseTag);
+		baseDir = path.join(baseDir, fs.readdirSync(baseDir)[0]); // Append the auto-generated base github dir.
 	}
 
 	const lines = (packages ? packages.split(',') : await readReqs(reqFiles, baseDir)).filter(l => l.trim().length);
@@ -65,11 +66,12 @@ async function run() {
 
 const readReqs = async (files, baseDir) => {
 	const ret = new Set();
-
+	if (!files || !baseDir) {
+		return [];
+	}
 	if (files) {
 		files.split(',').filter(f => f.trim().length).map(f => {
 			f = path.join(baseDir, f.trim());
-			core.info(`Reading: ${f}`);
 			const lns = fs.readFileSync(f, 'utf-8').split('\n').filter(Boolean);
 			for (let l of lns) {
 				if (['<', '=='].every(ig => !l.includes(ig))) {
@@ -86,23 +88,29 @@ const readReqs = async (files, baseDir) => {
 };
 
 
-const downloadRepo = async(token, owner, repo, tag) => {
-	const out = '___tmp_dl';
-	const cmd = [`clone`, `-b`, tag, `--single-branch`, `--depth`, `1`,
-		`https://${token}@github.com/${owner}/${repo}.git`,
-		out
-	];
-	await new Promise( (res, rej) => {
-		const child = spawn('git', cmd);
-		child.on('exit', code => {
-			if (code) {
-				rej(`Failed tag download with code: ${code}`)
-			}
-			res()
-		});
+const downloadRepo = async(octokit, owner, repo, tag) => {
+	const arch = await octokit.repos.getArchiveLink({
+		owner,
+		repo,
+		archive_format: 'zipball',
+		ref: tag
 	});
 
-	return path.resolve(out);
+	const buff = await rp({
+		uri: arch.url,
+		method: "GET",
+		encoding: null,
+		headers: {
+			"Content-type": "application/zip"
+		}
+	});
+
+	const zip = new AdmZip(buff);
+	const target = './___tmp_extract';
+
+	await zip.extractAllTo(target,true);
+
+	return path.resolve(target);
 };
 
 
